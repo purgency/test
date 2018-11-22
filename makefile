@@ -2,7 +2,7 @@
 CC = mpicc
 
 # Compiler flags, paths and libraries
-CFLAGS = -pedantic -Wall -Wextra -O3 -ggdb -np 6
+CFLAGS = -pedantic -Wall -Wextra -O3 -ggdb
 LFLAGS = $(CFLAGS)
 
 all: timempi timempi2
