@@ -17,13 +17,15 @@ int main (int argc, char *argv[])
     MPI_Comm_size( MPI_COMM_WORLD, &size );
     if(rank == 0){
         int i;
-        for(i = 0; i < MPI_Comm_size; i++){
+        for(i = 0; i < size; i++){
             MPI_Status status;
+            char string[99];
             MPI_Recv(string,99,MPI_CHAR,i,0,MPI_COMM_WORLD,&status);
             printf(string);
         }
     } else {
-        sprintf(string,"%s : %ld\n",hostname,time.tv_usec)
+        char string[99];
+        sprintf(string,"%s : %ld\n",hostname,time.tv_usec);
         MPI_Send(string,99,MPI_CHAR,0,0,MPI_COMM_WORLD);
     }
     
