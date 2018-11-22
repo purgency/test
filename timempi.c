@@ -15,7 +15,18 @@ int main (int argc, char *argv[])
     MPI_Init( &argc, &argv );
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
-    printf("%s : %ld\n",hostname,time.tv_usec);
+    if(rank == 0){
+        int i;
+        for(i = 0; i < MPI_Comm_size; i++){
+            MPI_Status status;
+            MPI_Recv(string,99,MPI_CHAR,i,0,MPI_COMM_WORLD,&status);
+            printf(string);
+        }
+    } else {
+        sprintf(string,"%s : %ld\n",hostname,time.tv_usec)
+        MPI_Send(string,99,MPI_CHAR,0,0,MPI_COMM_WORLD);
+    }
+    
     MPI_Barrier(MPI_COMM_WORLD);
     gettimeofday(&endtime, NULL);
     printf("Rang %d beendet jetzt %ld\n", rank, endtime.tv_usec);
