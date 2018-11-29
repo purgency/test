@@ -19,8 +19,8 @@ init (int N,int size)
 	return buf;
 }
 
-int*
-circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
+int
+circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size, int* N)
 {
     MPI_Status status;
     
@@ -51,12 +51,19 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
     
     while(boolean){
         if(*rank % 2 == 0){
-            int* bufcopy = buf;
-            MPI_Recv(buf[1],sizeof(int),MPI_INT,predecessor,0,*MPI_COMM_WORLD,&status);
-            MPI_Send(bufcopy[1],sizeof(int),MPI_INT,successor,0,*MPI_COMM_WORLD);
+            int i;
+            for(i = 0; i < N / size ;i++){
+                MPI_Send(buf[i],sizeof(int),MPI_INT,successor,i,*MPI_COMM_WORLD);
+                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,*MPI_COMM_WORLD,&status);
+            }
         } else {
-            MPI_Send(buf[1],todo,todo,successor,0,*MPI_COMM_WORLD);
-            MPI_Recv(buf[1],todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+            int i;
+            int bufcopy[N/size];
+            for(i = 0; i < N / size ;i++){
+                bufcopy[i] = buf[i];
+                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,*MPI_COMM_WORLD,&status);
+                MPI_Send(bufcopy[i],sizeof(int),MPI_INT,successor,i,*MPI_COMM_WORLD);
+            }
         }
         
         if(*rank == size - 1){
@@ -76,12 +83,7 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
         }
     }
     
-    
-    
-	
-    
-    // TODO
-	return buf;
+    return 0;
 }
 
 int
@@ -107,23 +109,23 @@ main (int argc, char** argv)
     
     printf("\nBEFORE\n");
 
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < N / size; i++)
 	{
 		printf("rank %d: %d\n", rank, buf[i]);
 	}
 
-	circle(buf,&rank, &MPI_COMM_WORLD, &size);
+	circle(buf,&rank, &MPI_COMM_WORLD, &size, &N);
 
 	printf("\nAFTER\n");
 
-	for (int j = 0; j < N; j++)
+	for (int j = 0; j < N / size; j++)
 	{
 		printf("rank %d: %d\n", rank, buf[j]);
 	}
     
-    MPI_Finalize();
-    
     free(buf);
+    
+    MPI_Finalize();
 
 	return EXIT_SUCCESS;
 }
