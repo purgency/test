@@ -20,7 +20,7 @@ init (int N)
 }
 
 int*
-circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
+circle (int* bufpart,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
 {
     MPI_Status status;
     
@@ -28,9 +28,9 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
     int successor;
     
     if(*rank == 0){
-        predecessor = size;
+        predecessor = size-1;
         successor = 1;
-    } else if(*rank == size) {
+    } else if(*rank == size-1) {
         predecessor = *rank - 1;
         successor = 0;
     } else {
@@ -38,13 +38,44 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
         successor = *rank + 1;
     }
     
-    if(*rank % 2 == 0){
-        MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
-        MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
-    } else {
-        MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
-        MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+    if(*rank == 0){
+        MPI_Send(todo,todo,todo,size-1,0,*MPI_COMM_WORLD);
+    } else if(*rank == size-1) {
+        MPI_Recv(todo,todo,todo,0,0,*MPI_COMM_WORLD,&status);
+        int firstelem = todo;
     }
+    
+    int bool = 1;
+    int terminator;
+            
+    
+    while(bool){
+        if(*rank % 2 == 0){
+            MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+            MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
+        } else {
+            MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
+            MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+        }
+        
+        if(*rank == size - 1){
+            if(bufpart[1] == firstelem){
+                terminator = 1;
+            
+            int i;
+            for(i = 0; i < size ;i++){
+                MPI_Send(terminator,sizeof(int),MPI_INT,i,0,*MPI_COMM_WORLD);
+            }
+        } else {
+            MPI_Recv(terminator,sizeof(int),MPI_INT,size - 1,0,*MPI_COMM_WORLD,&status);
+        }
+        
+        if(terminator){
+            bool = 0;
+        }
+    }
+    
+    
     
 	
     
