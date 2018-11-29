@@ -1,16 +1,14 @@
 #include "mpi.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <time.h>
 
 int*
-init (int N,int size)
+init (int N,int size,int rank)
 {
-	struct timeval time;
-    gettimeofday(&time,NULL);
 	int* buf = malloc(sizeof(int) * (N / size));
 
-	srand(time.tv_usec);
+	srand(time(NULL)+rank);
 
 	for (int i = 0; i < N / size; i++)
 	{
@@ -109,7 +107,7 @@ main (int argc, char** argv)
     
 	// Array length
 	N = atoi(argv[1]);
-	buf = init(N, size);
+	buf = init(N, size,rank);
     
     printf("\nBEFORE\n");
 
