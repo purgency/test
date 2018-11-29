@@ -39,10 +39,10 @@ circle (int* buf,int* rank,int* size, int* N)
         successor = *rank + 1;
     }
     
-    int firstelem;
+    int* firstelem;
     
     if(*rank == 0){
-        MPI_Send(buf[1],sizeof(int),MPI_INT,*size-1,0,MPI_COMM_WORLD);
+        MPI_Send(buf,sizeof(int),MPI_INT,*size-1,0,MPI_COMM_WORLD);
     } else if(*rank == *size-1) {
         MPI_Recv(firstelem,sizeof(int),MPI_INT,0,0,MPI_COMM_WORLD,&status);
     }
@@ -55,21 +55,17 @@ circle (int* buf,int* rank,int* size, int* N)
         if(*rank % 2 == 0){
             int i;
             for(i = 0; i < N / *size ;i++){
-                MPI_Send(buf[i],sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
-                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+                MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+                MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
             }
         } else {
             int i;
-            int bufcopy[N/size];
-            for(i = 0; i < N / *size ;i++){
-                bufcopy[i] = buf[i];
-                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
-                MPI_Send(bufcopy[i],sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
-            }
+            MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+            MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
         }
         
         if(*rank == *size - 1){
-            if(buf[1] == firstelem){
+            if(buf[1] == firstelem[1]){
                 terminator = 1;
             }
             int i;
