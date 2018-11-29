@@ -3,14 +3,14 @@
 #include <time.h>
 
 int*
-init (int N)
+init (int N,int size)
 {
 	// TODO
-	int* buf = malloc(sizeof(int) * N);
+	int* buf = malloc(sizeof(int) * (N / size));
 
 	srand(time(NULL));
 
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < N / size; i++)
 	{
 		// Do not modify "% 25"
 		buf[i] = rand() % 25;
@@ -20,7 +20,7 @@ init (int N)
 }
 
 int*
-circle (int* bufpart,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
+circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
 {
     MPI_Status status;
     
@@ -39,29 +39,30 @@ circle (int* bufpart,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
     }
     
     if(*rank == 0){
-        MPI_Send(todo,todo,todo,size-1,0,*MPI_COMM_WORLD);
+        MPI_Send(buf[1],sizeof(int),MPI_INT,size-1,0,*MPI_COMM_WORLD);
     } else if(*rank == size-1) {
-        MPI_Recv(todo,todo,todo,0,0,*MPI_COMM_WORLD,&status);
-        int firstelem = todo;
+        int firstelem;
+        MPI_Recv(firstelem,sizeof(int),MPI_INT,0,0,*MPI_COMM_WORLD,&status);
     }
     
-    int bool = 1;
-    int terminator;
+    int boolean = 1;
+    int terminator = 0;
             
     
-    while(bool){
+    while(boolean){
         if(*rank % 2 == 0){
-            MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
-            MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
+            int* bufcopy = buf;
+            MPI_Recv(buf[1],sizeof(int),MPI_INT,predecessor,0,*MPI_COMM_WORLD,&status);
+            MPI_Send(bufcopy[1],sizeof(int),MPI_INT,successor,0,*MPI_COMM_WORLD);
         } else {
-            MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
-            MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+            MPI_Send(buf[1],todo,todo,successor,0,*MPI_COMM_WORLD);
+            MPI_Recv(buf[1],todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
         }
         
         if(*rank == size - 1){
-            if(bufpart[1] == firstelem){
+            if(buf[1] == firstelem){
                 terminator = 1;
-            
+            }
             int i;
             for(i = 0; i < size ;i++){
                 MPI_Send(terminator,sizeof(int),MPI_INT,i,0,*MPI_COMM_WORLD);
@@ -71,7 +72,7 @@ circle (int* bufpart,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
         }
         
         if(terminator){
-            bool = 0;
+            boolean = 0;
         }
     }
     
@@ -96,25 +97,22 @@ main (int argc, char** argv)
 		return EXIT_FAILURE;
 	}
     
-	// Array length
-	N = atoi(argv[1]);
-	buf = init(N);
-
-	MPI_Init( &argc, &argv );
+    MPI_Init( &argc, &argv );
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
     
-    //division kinda sucks because it might be some decimal which will fail to be represented by int
-    int* bufpart = buf + (rank-1) * (N / size);
-
-	printf("\nBEFORE\n");
+	// Array length
+	N = atoi(argv[1]);
+	buf = init(N, size);
+    
+    printf("\nBEFORE\n");
 
 	for (int i = 0; i < N; i++)
 	{
 		printf("rank %d: %d\n", rank, buf[i]);
 	}
 
-	circle(bufpart,&rank, &MPI_COMM_WORLD, &size);
+	circle(buf,&rank, &MPI_COMM_WORLD, &size);
 
 	printf("\nAFTER\n");
 
