@@ -39,10 +39,11 @@ circle (int* buf,int* rank,int* size, int* N)
         successor = *rank + 1;
     }
     
+    int firstelem;
+    
     if(*rank == 0){
         MPI_Send(buf[1],sizeof(int),MPI_INT,size-1,0,MPI_COMM_WORLD);
     } else if(*rank == size-1) {
-        int firstelem;
         MPI_Recv(firstelem,sizeof(int),MPI_INT,0,0,MPI_COMM_WORLD,&status);
     }
     
