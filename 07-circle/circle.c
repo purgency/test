@@ -15,6 +15,7 @@ init (int N,int size)
 	{
 		// Do not modify "% 25"
 		buf[i] = rand() % 25;
+        printf("%d\n",buf[i]);
 	}
 
 	return buf;
