@@ -8,7 +8,7 @@ init (int N,int size,int rank)
 {
 	int* buf = malloc(sizeof(int) * (N / size));
 
-	srand(time(NULL)+rank);
+	srand(time(NULL)+rank*42);
 
 	for (int i = 0; i < N / size; i++)
 	{
