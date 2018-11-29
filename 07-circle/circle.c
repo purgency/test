@@ -21,7 +21,7 @@ init (int N,int size)
 }
 
 int
-circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size, int* N)
+circle (int* buf,int* rank,int* size, int* N)
 {
     MPI_Status status;
     
@@ -40,10 +40,10 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size, int* N)
     }
     
     if(*rank == 0){
-        MPI_Send(buf[1],sizeof(int),MPI_INT,size-1,0,*MPI_COMM_WORLD);
+        MPI_Send(buf[1],sizeof(int),MPI_INT,size-1,0,MPI_COMM_WORLD);
     } else if(*rank == size-1) {
         int firstelem;
-        MPI_Recv(firstelem,sizeof(int),MPI_INT,0,0,*MPI_COMM_WORLD,&status);
+        MPI_Recv(firstelem,sizeof(int),MPI_INT,0,0,MPI_COMM_WORLD,&status);
     }
     
     int boolean = 1;
@@ -54,16 +54,16 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size, int* N)
         if(*rank % 2 == 0){
             int i;
             for(i = 0; i < N / size ;i++){
-                MPI_Send(buf[i],sizeof(int),MPI_INT,successor,i,*MPI_COMM_WORLD);
-                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,*MPI_COMM_WORLD,&status);
+                MPI_Send(buf[i],sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
             }
         } else {
             int i;
             int bufcopy[N/size];
             for(i = 0; i < N / size ;i++){
                 bufcopy[i] = buf[i];
-                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,*MPI_COMM_WORLD,&status);
-                MPI_Send(bufcopy[i],sizeof(int),MPI_INT,successor,i,*MPI_COMM_WORLD);
+                MPI_Recv(buf[i],sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+                MPI_Send(bufcopy[i],sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
             }
         }
         
@@ -73,10 +73,10 @@ circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size, int* N)
             }
             int i;
             for(i = 0; i < size ;i++){
-                MPI_Send(terminator,sizeof(int),MPI_INT,i,0,*MPI_COMM_WORLD);
+                MPI_Send(terminator,sizeof(int),MPI_INT,i,0,MPI_COMM_WORLD);
             }
         } else {
-            MPI_Recv(terminator,sizeof(int),MPI_INT,size - 1,0,*MPI_COMM_WORLD,&status);
+            MPI_Recv(terminator,sizeof(int),MPI_INT,size - 1,0,MPI_COMM_WORLD,&status);
         }
         
         if(terminator){
@@ -115,7 +115,7 @@ main (int argc, char** argv)
 		printf("rank %d: %d\n", rank, buf[i]);
 	}
 
-	circle(buf,&rank, &MPI_COMM_WORLD, &size, &N);
+	circle(buf,&rank, &size, &N);
 
 	printf("\nAFTER\n");
 
