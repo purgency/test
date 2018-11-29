@@ -56,16 +56,18 @@ circle (int* buf,int* rank,int* size, int* N)
         if(*rank % 2 == 0){
             int i;
             for(i = 0; i < *N / *size ;i++){
-                MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
-                MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+                MPI_Send(buf+i,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+                MPI_Recv(buf+i,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
             }
-        } /**else {
+        } else {
             int i;
+            int copy;
             for(i = 0; i < *N / *size ;i++){
-                MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
-                MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+                copy = *(buf+i);
+                MPI_Recv(buf+i,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+                MPI_Send(&copy,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
             }
-        }**/
+        }
         
         if(*rank == *size - 1){
             if(*buf == firstelem){
