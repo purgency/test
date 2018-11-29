@@ -1,15 +1,15 @@
 #include "mpi.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 
 int*
 init (int N,int size)
 {
-	// TODO
+	struct timeval time;
 	int* buf = malloc(sizeof(int) * (N / size));
 
-	srand(time(NULL));
+	srand(time.tv_usec);
 
 	for (int i = 0; i < N / size; i++)
 	{
