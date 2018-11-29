@@ -60,8 +60,10 @@ circle (int* buf,int* rank,int* size, int* N)
             }
         } else {
             int i;
-            MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
-            MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+            for(i = 0; i < *N / *size ;i++){
+                MPI_Recv(buf,sizeof(int),MPI_INT,predecessor,i,MPI_COMM_WORLD,&status);
+                MPI_Send(buf,sizeof(int),MPI_INT,successor,i,MPI_COMM_WORLD);
+            }
         }
         
         if(*rank == *size - 1){
