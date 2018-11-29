@@ -20,12 +20,33 @@ init (int N)
 }
 
 int*
-circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD)
+circle (int* buf,int* rank,MPI_Comm_rank* MPI_COMM_WORLD,int* size)
 {
     MPI_Status status;
     
-	MPI_Recv(todo,todo,todo,*rank-1,0,*MPI_COMM_WORLD,&status);
-    MPI_Send(todo,todo,todo,*rank+1,0,*MPI_COMM_WORLD);
+    int predecessor;
+    int successor;
+    
+    if(*rank == 0){
+        predecessor = size;
+        successor = 1;
+    } else if(*rank == size) {
+        predecessor = *rank - 1;
+        successor = 0;
+    } else {
+        predecessor = *rank - 1;
+        successor = *rank + 1;
+    }
+    
+    if(*rank % 2 == 0){
+        MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+        MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
+    } else {
+        MPI_Send(todo,todo,todo,successor,0,*MPI_COMM_WORLD);
+        MPI_Recv(todo,todo,todo,predecessor,0,*MPI_COMM_WORLD,&status);
+    }
+    
+	
     
     // TODO
 	return buf;
@@ -62,7 +83,7 @@ main (int argc, char** argv)
 		printf("rank %d: %d\n", rank, buf[i]);
 	}
 
-	circle(bufpart,&rank, &MPI_COMM_WORLD);
+	circle(bufpart,&rank, &MPI_COMM_WORLD, &size);
 
 	printf("\nAFTER\n");
 
