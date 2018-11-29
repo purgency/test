@@ -48,8 +48,7 @@ circle (int* buf,int* rank,int* size, int* N)
     }
     
     int boolean = 1;
-    int* terminator;
-    *terminator = 0;
+    int terminator = 0;
             
     
     while(boolean){
@@ -67,17 +66,17 @@ circle (int* buf,int* rank,int* size, int* N)
         
         if(*rank == *size - 1){
             if(*buf == *firstelem){
-                *terminator = 1;
+                terminator = 1;
             }
             int i;
             for(i = 0; i < *size ;i++){
-                MPI_Send(terminator,sizeof(int),MPI_INT,i,0,MPI_COMM_WORLD);
+                MPI_Send(&terminator,sizeof(int),MPI_INT,i,0,MPI_COMM_WORLD);
             }
         } else {
-            MPI_Recv(terminator,sizeof(int),MPI_INT,*size - 1,0,MPI_COMM_WORLD,&status);
+            MPI_Recv(&terminator,sizeof(int),MPI_INT,*size - 1,0,MPI_COMM_WORLD,&status);
         }
         
-        if(*terminator){
+        if(terminator){
             boolean = 0;
         }
     }
