@@ -7,6 +7,7 @@ int*
 init (int N,int size)
 {
 	struct timeval time;
+    gettimeofday(&time,NULL);
 	int* buf = malloc(sizeof(int) * (N / size));
 
 	srand(time.tv_usec);
